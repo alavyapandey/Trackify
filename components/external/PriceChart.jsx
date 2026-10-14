@@ -60,8 +60,8 @@ const PriceChart = ({ productId }) => {
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray=" 3 3" stroke="#e5e7eb" />
-          <XAxis dataKey="date" tick={{ fontSize12 }} stroke="#9ca3af" />
-          <YAxis tick={{ fontSize12 }} stroke="#9ca3af" />
+          <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9ca3af" />
+          <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
           <Tooltip
             contentStyle={{
               backgroundColor: "white",

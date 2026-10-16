@@ -12,7 +12,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const authHeader = request.headers.get("authorization");
-    const cronSecret = process.env.CRON_SECERET;
+    const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: "Uauthorized" }, { status: 401 });
@@ -25,8 +25,10 @@ export async function POST(request) {
     );
 
     const { data: products, error: productsError } = await supabase
-      .from("products")
+      .from("trackify_products")
       .select("*");
+
+    if (productsError) throw productsError;
 
     console.log(`Found ${products.length} products to check`);
 
@@ -51,7 +53,7 @@ export async function POST(request) {
         const oldPrice = parseFloat(product.current_price);
 
         await supabase
-          .from("products")
+          .from("trackify_products")
           .update({
             current_price: newPrice,
             currency: productData.currencyCode || product.currency,

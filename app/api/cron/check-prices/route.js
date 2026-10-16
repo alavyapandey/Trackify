@@ -15,7 +15,7 @@ export async function POST(request) {
     const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Uauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Use service role to bypass RLS
@@ -45,11 +45,30 @@ export async function POST(request) {
         const productData = await scrapeProduct(product.url);
 
         if (!productData.currentPrice) {
+          console.warn(
+            `No price returned for product ${product.id} (${product.url})`,
+          );
+          console.warn(
+            "scrapeProduct returned:",
+            JSON.stringify(productData).slice(0, 300),
+          );
+          results.failed++;
+          continue;
+        }
+        const rawPrice = String(productData.currentPrice).replace(
+          /[^0-9.]/g,
+          "",
+        );
+        const newPrice = parseFloat(rawPrice);
+
+        if (Number.isNaN(newPrice) || newPrice <= 0) {
+          console.warn(
+            `Unparseable price "${productData.currentPrice}" for product ${product.id}`,
+          );
           results.failed++;
           continue;
         }
 
-        const newPrice = parseFloat(productData.currentPrice);
         const oldPrice = parseFloat(product.current_price);
 
         await supabase
@@ -59,7 +78,7 @@ export async function POST(request) {
             currency: productData.currencyCode || product.currency,
             name: productData.productName || product.name,
             image_url: productData.productImageUrl || product.image_url,
-            update_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           })
           .eq("id", product.id);
 

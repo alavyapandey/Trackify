@@ -42,7 +42,16 @@ export async function POST(request) {
 
     for (const product of products) {
       try {
+        // Finding Error
+        // console.log("Checking product:", {
+        //   id: product.id,
+        //   url: product.url,
+        // });
+
         const productData = await scrapeProduct(product.url);
+
+        // Finding Error
+        // console.log("Scraper response:", JSON.stringify(productData, null, 2));
 
         if (!productData.currentPrice) {
           console.warn(
@@ -91,6 +100,13 @@ export async function POST(request) {
 
           results.priceChanges++;
 
+          // Testing Alert
+          // console.log("Price comparison:", {
+          //   oldPrice,
+          //   newPrice,
+          //   priceDropped: newPrice < oldPrice,
+          // });
+
           if (newPrice < oldPrice) {
             //  Alert
             const {
@@ -115,6 +131,11 @@ export async function POST(request) {
         results.updated++;
       } catch (error) {
         console.log(`Error processing product ${product.id}:`, error);
+        // Finding Error
+        // console.error(`Error processing product ${product.id}:`, {
+        //   message: error.message,
+        //   stack: error.stack,
+        // });
         results.failed++;
       }
     }
